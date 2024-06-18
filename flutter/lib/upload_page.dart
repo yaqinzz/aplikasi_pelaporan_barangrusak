@@ -87,7 +87,7 @@ class _AddDamagedItemPageState extends State<AddDamagedItemPage> {
 
     try {
       // Ganti dengan alamat API yang sesuai
-      final apiUrl = 'http://localhost:3000/api/upload';
+      final apiUrl = 'http://10.0.2.2:3000/api/upload';
 
       // Kirim data ke API
       final response = await http.post(

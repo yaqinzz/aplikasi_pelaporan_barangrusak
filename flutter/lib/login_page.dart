@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'register_page.dart';
-import 'home_page.dart'; // Pastikan Anda mengimpor HomePage jika sudah didefinisikan
+import 'home_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -20,7 +21,8 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
-    const String urlApi = 'http://localhost:3000/api/login';
+    const String urlApi =
+        'http://10.0.2.2:3000/api/login'; // Gunakan ini untuk emulator
 
     try {
       var response = await http.post(
@@ -31,16 +33,23 @@ class _LoginPageState extends State<LoginPage> {
         },
       );
 
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
 
         if (jsonResponse['status'] == true) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setInt('userId', jsonResponse['user']['id']);
+          prefs.setString('username', jsonResponse['user']['username']);
           showDialog(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
                 title: const Text('Login Berhasil'),
-                content: Text('Selamat datang, ${jsonResponse['user']['username']}'),
+                content:
+                    Text('Selamat datang, ${jsonResponse['user']['username']}'),
                 actions: <Widget>[
                   TextButton(
                     child: Text('OK'),
@@ -48,7 +57,9 @@ class _LoginPageState extends State<LoginPage> {
                       Navigator.of(context).pop();
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => MyHomePage()), // Ganti dengan HomePage()
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                MyHomePage()), // Ganti dengan HomePage()
                       );
                     },
                   ),
@@ -95,6 +106,7 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } catch (e) {
+      print('Error: $e');
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -182,7 +194,8 @@ class _LoginPageState extends State<LoginPage> {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : Text('Login'),

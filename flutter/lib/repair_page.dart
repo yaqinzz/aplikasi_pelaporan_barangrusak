@@ -19,7 +19,8 @@ class _RepairPageState extends State<RepairPage> {
   }
 
   Future<void> _fetchDamagedItems() async {
-    const String urlApi = 'http://localhost:3000/api/damaged-items'; // Update with your API URL
+    const String urlApi =
+        'http://10.0.2.2:3000/api/damaged-items'; // Update with your API URL
     final url = Uri.parse(urlApi);
 
     try {
@@ -60,7 +61,8 @@ class _RepairPageState extends State<RepairPage> {
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 8.0),
                         child: ListTile(
-                          leading: Icon(Icons.broken_image, size: 40, color: Colors.red),
+                          leading: Icon(Icons.broken_image,
+                              size: 40, color: Colors.red),
                           title: Text(
                             item['nama_barang'] ?? 'Nama Barang Tidak Tersedia',
                             style: TextStyle(
@@ -68,7 +70,8 @@ class _RepairPageState extends State<RepairPage> {
                               fontSize: 16,
                             ),
                           ),
-                          subtitle: Text(item['deskripsi_kerusakan'] ?? 'Deskripsi Tidak Tersedia'),
+                          subtitle: Text(item['deskripsi_kerusakan'] ??
+                              'Deskripsi Tidak Tersedia'),
                           trailing: Icon(Icons.arrow_forward_ios),
                           onTap: () {
                             _showItemDetails(item);

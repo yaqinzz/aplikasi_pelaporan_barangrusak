@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({Key? key}) : super(key: key);
@@ -10,7 +11,8 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
-  String username = "Nama Pengguna";
+  String username = "";
+  int userId = 0;
   final String profileImageUrl = "https://via.placeholder.com/150";
 
   @override
@@ -21,16 +23,22 @@ class _AccountPageState extends State<AccountPage> {
 
   Future<void> getUsernameFromApi() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:3000/api/username'));
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          username = data['username'];
-        });
-      } else {
-        // Handle jika gagal mendapatkan data
-        print('Gagal mendapatkan nama pengguna');
-      }
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        username = prefs.getString('username') ?? "Nama Pengguna";
+        userId = prefs.getInt('userId') ?? -1;
+      });
+      // final response =
+      //     await http.get(Uri.parse('http://10.0.2.2:3000/api/username'));
+      // if (response.statusCode == 200) {
+      //   final data = jsonDecode(response.body);
+      //   setState(() {
+      //     username = data['username'];
+      //   });
+      // } else {
+      //   // Handle jika gagal mendapatkan data
+      //   print('Gagal mendapatkan nama pengguna');
+      // }
     } catch (error) {
       // Handle error ketika terjadi kesalahan koneksi atau lainnya
       print('Error: $error');
@@ -39,9 +47,15 @@ class _AccountPageState extends State<AccountPage> {
 
   Future<void> changePassword(String newPassword) async {
     try {
+      print('Sending change password request with username: $username');
+      print('New password: $newPassword');
       final response = await http.put(
-        Uri.parse('http://localhost:3000/api/change-password'),
-        body: jsonEncode({'newPassword': newPassword}),
+        Uri.parse('http://10.0.2.2:3000/api/change-password'),
+        body: jsonEncode({
+          'username':
+              username, // Mengirim username sebagai bagian dari body request
+          'newPassword': newPassword,
+        }),
         headers: {'Content-Type': 'application/json'},
       );
       if (response.statusCode == 200) {
@@ -51,6 +65,11 @@ class _AccountPageState extends State<AccountPage> {
           ),
         );
       } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gagal mengubah kata sandi'),
+          ),
+        );
         print('Gagal mengubah kata sandi');
       }
     } catch (error) {
@@ -61,7 +80,7 @@ class _AccountPageState extends State<AccountPage> {
   Future<void> changeProfile(String newProfileInfo) async {
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:3000/api/change-profile'),
+        Uri.parse('http://10.0.2.2:3000/api/change-profile'),
         body: jsonEncode({'newProfileInfo': newProfileInfo}),
         headers: {'Content-Type': 'application/json'},
       );
@@ -81,9 +100,11 @@ class _AccountPageState extends State<AccountPage> {
 
   Future<void> changeUsername(String newUsername) async {
     try {
+      print(
+          'Mengubah username dari $username menjadi $newUsername untuk userID: $userId');
       final response = await http.put(
-        Uri.parse('http://localhost:3000/api/change-username'),
-        body: jsonEncode({'newUsername': newUsername}),
+        Uri.parse('http://10.0.2.2:3000/api/change-username'),
+        body: jsonEncode({'id': userId, 'newUsername': newUsername}),
         headers: {'Content-Type': 'application/json'},
       );
       if (response.statusCode == 200) {
@@ -93,9 +114,15 @@ class _AccountPageState extends State<AccountPage> {
           ),
         );
         setState(() {
-          username = newUsername; // Update nama pengguna di aplikasi setelah berhasil diubah
+          username =
+              newUsername; // Update nama pengguna di aplikasi setelah berhasil diubah
         });
       } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gagal mengubah username'),
+          ),
+        );
         print('Gagal mengubah username');
       }
     } catch (error) {
@@ -211,7 +238,8 @@ class _AccountPageState extends State<AccountPage> {
         return AlertDialog(
           title: const Text('Ubah Profil'),
           content: TextField(
-            decoration: InputDecoration(hintText: "Masukkan informasi profil baru"),
+            decoration:
+                InputDecoration(hintText: "Masukkan informasi profil baru"),
             onChanged: (value) {
               newProfileInfo = value;
             },
