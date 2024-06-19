@@ -1,0 +1,4 @@
+#Wed Jun 19 10:20:14 WIB 2024
+base.0=D\:\\projek web\\aplikasi_pelaporan_barangrusak\\flutter\\build\\app\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex

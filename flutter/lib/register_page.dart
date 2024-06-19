@@ -13,7 +13,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
 
   Future<void> register() async {
-    final url = Uri.parse('http://localhost:3000/api/register'); // Sesuaikan dengan URL API Anda
+    final url = Uri.parse(
+        'https://api-sigma-six-82.vercel.app/api/register'); // Sesuaikan dengan URL API Anda
     try {
       final response = await http.post(
         url,
@@ -73,7 +74,8 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Register'),
-        backgroundColor: Colors.blue, // Ubah warna latar belakang appbar menjadi biru
+        backgroundColor:
+            Colors.blue, // Ubah warna latar belakang appbar menjadi biru
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -144,7 +146,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue, // Ubah warna tombol menjadi biru
+                  backgroundColor:
+                      Colors.blue, // Ubah warna tombol menjadi biru
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),

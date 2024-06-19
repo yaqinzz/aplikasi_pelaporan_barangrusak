@@ -42,25 +42,6 @@
                     }
                 },
                 {
-                    "source": "D:\\projek web\\tugas likah\\aplikasi_pelaporan_barangrusak\\flutter\\android\\app\\src\\main\\res\\values\\styles.xml",
-                    "from": {
-                        "startLines": "3,14",
-                        "startColumns": "4,4",
-                        "startOffsets": "176,832",
-                        "endLines": "7,16",
-                        "endColumns": "12,12",
-                        "endOffsets": "483,998"
-                    },
-                    "to": {
-                        "startLines": "108,112",
-                        "startColumns": "4,4",
-                        "startOffsets": "6436,6617",
-                        "endLines": "111,114",
-                        "endColumns": "12,12",
-                        "endOffsets": "6612,6781"
-                    }
-                },
-                {
                     "source": "C:\\Users\\lenovo\\.gradle\\caches\\transforms-3\\7e30f4b09ad63b0fe951adc42de2658a\\transformed\\jetified-activity-1.7.2\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2,3",
@@ -126,6 +107,25 @@
                         "startOffsets": "5597",
                         "endColumns": "53",
                         "endOffsets": "5646"
+                    }
+                },
+                {
+                    "source": "D:\\projek web\\aplikasi_pelaporan_barangrusak\\flutter\\android\\app\\src\\main\\res\\values\\styles.xml",
+                    "from": {
+                        "startLines": "3,14",
+                        "startColumns": "4,4",
+                        "startOffsets": "176,832",
+                        "endLines": "7,16",
+                        "endColumns": "12,12",
+                        "endOffsets": "483,998"
+                    },
+                    "to": {
+                        "startLines": "108,112",
+                        "startColumns": "4,4",
+                        "startOffsets": "6436,6617",
+                        "endLines": "111,114",
+                        "endColumns": "12,12",
+                        "endOffsets": "6612,6781"
                     }
                 },
                 {

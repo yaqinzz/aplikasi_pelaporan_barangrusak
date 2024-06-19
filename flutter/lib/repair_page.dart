@@ -20,7 +20,7 @@ class _RepairPageState extends State<RepairPage> {
 
   Future<void> _fetchDamagedItems() async {
     const String urlApi =
-        'http://10.0.2.2:3000/api/damaged-items'; // Update with your API URL
+        'https://api-sigma-six-82.vercel.app/api/damaged-items'; // Update with your API URL
     final url = Uri.parse(urlApi);
 
     try {

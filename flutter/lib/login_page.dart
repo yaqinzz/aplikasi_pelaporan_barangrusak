@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     const String urlApi =
-        'http://10.0.2.2:3000/api/login'; // Gunakan ini untuk emulator
+        'https://api-sigma-six-82.vercel.app/api/login'; // Gunakan ini untuk emulator
 
     try {
       var response = await http.post(

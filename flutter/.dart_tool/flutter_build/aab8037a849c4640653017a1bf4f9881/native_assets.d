@@ -1,0 +1,1 @@
+ D:\\projek\ web\\aplikasi_pelaporan_barangrusak\\flutter\\.dart_tool\\flutter_build\\aab8037a849c4640653017a1bf4f9881\\native_assets.yaml: 

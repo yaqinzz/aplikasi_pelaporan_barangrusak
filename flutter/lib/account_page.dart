@@ -50,7 +50,7 @@ class _AccountPageState extends State<AccountPage> {
       print('Sending change password request with username: $username');
       print('New password: $newPassword');
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:3000/api/change-password'),
+        Uri.parse('https://api-sigma-six-82.vercel.app/api/change-password'),
         body: jsonEncode({
           'username':
               username, // Mengirim username sebagai bagian dari body request
@@ -80,7 +80,7 @@ class _AccountPageState extends State<AccountPage> {
   Future<void> changeProfile(String newProfileInfo) async {
     try {
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:3000/api/change-profile'),
+        Uri.parse('https://api-sigma-six-82.vercel.app/api/change-profile'),
         body: jsonEncode({'newProfileInfo': newProfileInfo}),
         headers: {'Content-Type': 'application/json'},
       );
@@ -103,7 +103,7 @@ class _AccountPageState extends State<AccountPage> {
       print(
           'Mengubah username dari $username menjadi $newUsername untuk userID: $userId');
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:3000/api/change-username'),
+        Uri.parse('https://api-sigma-six-82.vercel.app/api/change-username'),
         body: jsonEncode({'id': userId, 'newUsername': newUsername}),
         headers: {'Content-Type': 'application/json'},
       );
