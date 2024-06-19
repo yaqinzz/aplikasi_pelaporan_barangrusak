@@ -1,7 +1,6 @@
 const express = require('express')
-const mysql = require('mysql2')
+const mysql = require('mysql2/promise') // Use promise-based version
 const cors = require('cors')
-// const bodyParser = require('body-parser')
 const bcrypt = require('bcryptjs')
 
 const app = express()
@@ -13,41 +12,36 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
 // Konfigurasi koneksi database
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'aplikasi_jasa',
-})
-
-// Connect ke database
-db.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err.message)
-    process.exit(1)
-  }
-  console.log('MySQL Connected...')
+const pool = mysql.createPool({
+  host: 'b2glxbel6c3twu792uro-mysql.services.clever-cloud.com',
+  user: 'ufurv19hhza17ifh',
+  password: 'sfxQLDKCws38zedcFwcT',
+  database: 'b2glxbel6c3twu792uro',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 })
 
 // REGISTER: Tambah pengguna baru
 app.post('/api/register', async (req, res) => {
   const {name, username, password} = req.body
   const sql = 'INSERT INTO login (name, username, password) VALUES (?, ?, ?)'
-  db.query(sql, [name, username, password], (err, result) => {
-    if (err) {
-      console.error('Error adding user:', err.message)
-      return res.status(500).json({
-        status: false,
-        message: 'Error adding user',
-        error: err.message,
-      })
-    }
+
+  try {
+    const [result] = await pool.query(sql, [name, username, password])
     res.status(200).json({
       status: true,
       message: 'User registered successfully',
       data: {name, username, password},
     })
-  })
+  } catch (err) {
+    console.error('Error adding user:', err.message)
+    res.status(500).json({
+      status: false,
+      message: 'Error adding user',
+      error: err.message,
+    })
+  }
 })
 
 let currentUsername = 'Nama Pengguna' // Contoh nama pengguna default
@@ -58,32 +52,27 @@ app.get('/api/username', (req, res) => {
 })
 
 // Endpoint untuk mengubah kata sandi
-app.put('/api/change-password', (req, res) => {
+app.put('/api/change-password', async (req, res) => {
   const {username, newPassword} = req.body
 
   if (!username || !newPassword) {
     return res.status(400).json({message: 'Username dan kata sandi baru diperlukan'})
   }
 
-  bcrypt.hash(newPassword, 10, (err, hashedPassword) => {
-    if (err) {
-      return res.status(500).json({message: 'Terjadi kesalahan. Silakan coba lagi nanti.'})
+  try {
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+    const query = 'UPDATE login SET password = ? WHERE username = ?'
+    const [results] = await pool.query(query, [hashedPassword, username])
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({message: 'Pengguna tidak ditemukan'})
     }
 
-    const query = 'UPDATE login SET password = ? WHERE username = ?'
-    db.query(query, [hashedPassword, username], (error, results) => {
-      if (error) {
-        console.error('Error executing query:', error)
-        return res.status(500).json({message: 'Terjadi kesalahan. Silakan coba lagi nanti.'})
-      }
-
-      if (results.affectedRows === 0) {
-        return res.status(404).json({message: 'Pengguna tidak ditemukan'})
-      }
-
-      res.json({message: 'Kata sandi berhasil diubah'})
-    })
-  })
+    res.json({message: 'Kata sandi berhasil diubah'})
+  } catch (err) {
+    console.error('Error executing query:', err)
+    res.status(500).json({message: 'Terjadi kesalahan. Silakan coba lagi nanti.'})
+  }
 })
 
 // Endpoint untuk mengubah profil
@@ -94,67 +83,55 @@ app.put('/api/change-profile', (req, res) => {
 })
 
 // Endpoint untuk mengubah username
-app.put('/api/change-username', (req, res) => {
+app.put('/api/change-username', async (req, res) => {
   const {id, newUsername} = req.body
   console.log(`ID: ${id}, Username: ${newUsername}`)
 
-  // Validasi sederhana (bisa disesuaikan dengan kebutuhan)
   if (!id || !newUsername || newUsername.trim() === '') {
     return res.status(400).json({message: 'Permintaan tidak valid'})
   }
 
-  // Query untuk mengubah username di database
-  const query = `UPDATE login SET username = ? WHERE id = ?`
+  try {
+    const query = `UPDATE login SET username = ? WHERE id = ?`
+    const [results] = await pool.query(query, [newUsername, id])
 
-  // Jalankan query
-  db.query(query, [newUsername, id], (error, results) => {
-    if (error) {
-      console.error('Gagal mengubah username:', error)
-      return res.status(500).json({message: 'Gagal mengubah username'})
+    if (results.affectedRows === 0) {
+      return res.status(404).json({message: 'Pengguna tidak ditemukan'})
     }
 
     console.log(`Username berhasil diubah menjadi: ${newUsername}`)
     res.json({message: 'Username berhasil diubah'})
-  })
+  } catch (error) {
+    console.error('Gagal mengubah username:', error)
+    res.status(500).json({message: 'Gagal mengubah username'})
+  }
 })
 
 // LOGIN: Verifikasi pengguna
 app.post('/api/login', async (req, res) => {
   const {username, password} = req.body
   const sql = 'SELECT * FROM login WHERE username = ?'
-  db.query(sql, [username], async (err, results) => {
-    if (err) {
-      console.error('Error during login:', err.message)
-      return res.status(500).json({
-        status: false,
-        message: 'Error during login',
-        error: err.message,
-      })
-    }
+
+  try {
+    const [results] = await pool.query(sql, [username])
+
     if (results.length > 0) {
       const user = results[0]
-      try {
-        if (await bcrypt.compare(password, user.password)) {
-          res.status(200).json({
-            status: true,
-            message: 'Login successful',
-            user: {
-              id: user.id,
-              username: user.username,
-            },
-          })
-        } else {
-          res.status(401).json({
-            status: false,
-            message: 'Invalid username or password',
-          })
-        }
-      } catch (error) {
-        console.error('Error comparing passwords:', error.message)
-        res.status(500).json({
+      const isPasswordValid = await bcrypt.compare(password, user.password)
+
+      if (isPasswordValid) {
+        res.status(200).json({
+          status: true,
+          message: 'Login successful',
+          user: {
+            id: user.id,
+            username: user.username,
+          },
+        })
+      } else {
+        res.status(401).json({
           status: false,
-          message: 'Error during login',
-          error: error.message,
+          message: 'Invalid username or password',
         })
       }
     } else {
@@ -163,40 +140,49 @@ app.post('/api/login', async (req, res) => {
         message: 'Invalid username or password',
       })
     }
-  })
+  } catch (error) {
+    console.error('Error during login:', error.message)
+    res.status(500).json({
+      status: false,
+      message: 'Error during login',
+      error: error.message,
+    })
+  }
 })
 
 // Endpoint untuk menerima data upload
 app.post('/api/upload', async (req, res) => {
   const {nama_barang, deskripsi_kerusakan, alamat, no_hp} = req.body
   const sql = 'INSERT INTO upload (nama_barang, deskripsi_kerusakan, alamat, no_hp) VALUES (?, ?, ?, ?)'
-  db.query(sql, [nama_barang, deskripsi_kerusakan, alamat, no_hp], (err, result) => {
-    if (err) {
-      console.error('Error adding upload:', err.message)
-      return res.status(500).json({
-        status: false,
-        message: 'Error adding upload',
-        error: err.message,
-      })
-    }
+
+  try {
+    const [result] = await pool.query(sql, [nama_barang, deskripsi_kerusakan, alamat, no_hp])
     res.status(200).json({
       status: true,
       message: 'Upload registered successfully',
       data: {nama_barang, deskripsi_kerusakan, alamat, no_hp},
     })
-  })
+  } catch (err) {
+    console.error('Error adding upload:', err.message)
+    res.status(500).json({
+      status: false,
+      message: 'Error adding upload',
+      error: err.message,
+    })
+  }
 })
 
 // Endpoint untuk mendapatkan daftar barang rusak
-app.get('/api/damaged-items', (req, res) => {
+app.get('/api/damaged-items', async (req, res) => {
   const sql = 'SELECT * FROM upload'
-  db.query(sql, (err, rows) => {
-    if (err) {
-      console.error('Error fetching damaged items:', err.message)
-      return res.status(500).json({error: err.message})
-    }
-    res.status(200).json(rows) // Respond with 200 OK and the fetched data
-  })
+
+  try {
+    const [rows] = await pool.query(sql)
+    res.status(200).json(rows)
+  } catch (err) {
+    console.error('Error fetching damaged items:', err.message)
+    res.status(500).json({error: err.message})
+  }
 })
 
 // Menjalankan server pada port 3000
